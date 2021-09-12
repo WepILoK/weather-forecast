@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
+
 import {fetchWeatherData} from "./store/ducks/weather/actionCreators";
 import {Header} from "./components/Header";
 import {selectWeatherData} from "./store/ducks/weather/selectors";

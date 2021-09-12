@@ -1,8 +1,10 @@
 import {call, put, takeLatest} from "redux-saga/effects";
+
 import {ActionsType, IFetchWeatherData} from "./contracts/actionTypes";
 import {setWeatherData} from "./actionCreators";
 import {IState} from "./contracts/state";
 import {Api} from "../../../api/api";
+
 
 export function* fetchWeatherDataRequest({payload}: IFetchWeatherData) {
     try {
