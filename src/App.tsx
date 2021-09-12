@@ -1,89 +1,64 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from "react-redux";
+import {fetchWeatherData} from "./store/ducks/weather/actionCreators";
+import {Header} from "./components/Header";
+import {selectWeatherData} from "./store/ducks/weather/selectors";
 
 
 export const App = () => {
-    const [typeUnit, setTypeUnit] = useState(false)
-    const [inputVisible, setInputVisible] = useState(false)
-    const toggleTypeUnit = () => {
-        setTypeUnit(c => !c)
-    }
-    const toggleInputVisible = () => {
-        setInputVisible(c => !c)
+    const dispatch = useDispatch()
+    const weatherData = useSelector(selectWeatherData)
+    const [typeUnit, setTypeUnit] = useState<'imperial' | 'metric'>('metric')
+    const [searchValue, setSearchValue] = useState('Омск')
+
+    const getWeather =() => {
+        dispatch(fetchWeatherData({location: searchValue, typeUnit}))
     }
 
-    return (
-        <div className='App'>
-            <div className="wrapper">
-                <header className='header'>
-                    {inputVisible ? (
-                        <div className='city'>
-                            <div className='city__title'>
-                                Омск
-                            </div>
-                            <div className='city__subtitle'>
-                                <p className='city__subtitle_change'
-                                   onClick={toggleInputVisible}>
-                                    Сменить город
-                                </p>
-                                <div>
-                                    <img src={require("./assets/images/location.svg").default}
-                                         alt='Location Svg'/>
-                                    <p>Мое местоположение</p>
+    useEffect(() => {
+        getWeather()
+    }, [])
+
+    if (weatherData) {
+        return (
+            <div className='App'>
+                <div className="wrapper">
+                    <Header getWeather={getWeather}
+                            searchValue={searchValue} setSearchValue={setSearchValue}
+                            setTypeUnit={setTypeUnit} typeUnit={typeUnit}/>
+                    <div className='content'>
+                        <div className='weather'>
+                            <div>
+                                <img
+                                    src={require(`./assets/images/${weatherData.weather[0].main}.svg`).default}
+                                    alt='Svg'/>
+                                <div className='weather__value'>
+                                    {Math.round(weatherData.main.temp)}º
                                 </div>
                             </div>
-                        </div>
-                    ) : (
-                        <div className='search'>
-                            <input/>
-                            <button
-                                onClick={toggleInputVisible}>
-                                OK
-                            </button>
-                        </div>
-                    )}
-                    <div className='switch'>
-                        <p>º</p>
-                        <div>
-                            <button className={typeUnit ? 'active' : ''}
-                                    onClick={toggleTypeUnit}>
-                                C
-                            </button>
-                            <button className={typeUnit ? '' : 'active'}
-                                    onClick={toggleTypeUnit}>
-                                F
-                            </button>
+                            <span>{weatherData.weather[0].description}</span>
                         </div>
                     </div>
-                </header>
-                <div className='content'>
-                    <div className='weather'>
-                        <div>
-                            <img src={require("./assets/images/sun.svg").default}
-                                 alt='Svg'/>
-                            <div className='weather__value'>19º</div>
+                    <div className='info'>
+                        <div className='info__item'>
+                            <p>Ветер</p>
+                            <div>{weatherData.wind.speed} м/c, западный</div>
                         </div>
-                        <span>Преимущественно солнечно</span>
-                    </div>
-                </div>
-                <div className='info'>
-                    <div className='info__item'>
-                        <p>Ветер</p>
-                        <div>5 м/c, западный</div>
-                    </div>
-                    <div className='info__item'>
-                        <p>Давление</p>
-                        <div>752 мм рт. ст.</div>
-                    </div>
-                    <div className='info__item'>
-                        <p>Влажность</p>
-                        <div>60%</div>
-                    </div>
-                    <div className='info__item'>
-                        <p>Вероятность дождя</p>
-                        <div>10%</div>
+                        <div className='info__item'>
+                            <p>Давление</p>
+                            <div>{weatherData.main.pressure} мм рт. ст.</div>
+                        </div>
+                        <div className='info__item'>
+                            <p>Влажность</p>
+                            <div>{weatherData.main.humidity}%</div>
+                        </div>
+                        <div className='info__item'>
+                            <p>Вероятность дождя</p>
+                            <div>10%</div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    }else  return null
 }
